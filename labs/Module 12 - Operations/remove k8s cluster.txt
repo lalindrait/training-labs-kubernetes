@@ -1,0 +1,12 @@
+kubectl drain worker-1 --delete-emptydir-data  --force --ignore-daemonsets
+kubectl drain worker-2 --delete-emptydir-data  --force --ignore-daemonsets
+
+kubeadm reset
+rm -rf ~/.kube
+
+remove packages sing dnf
+
+reboot all nodes before another cluster init
+
+
+

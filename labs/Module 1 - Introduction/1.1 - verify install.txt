@@ -1,0 +1,43 @@
+1.1 - Verify cluster installation - First deployement
+---------------------------------------------------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-pod
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+
+
+
+
+
+
+
+
+
+kubectl get nodes -o wide
+kubectl get all -o wide
+kubectl describe pod/nginx-pod-57d84f57dc-65lmj
+
+Power-off one of the worker nodes
+
+Observer node becoming NotReady and pods are restarted in another node
+
+
+
+kubectl get deployments
+kubectl delete deployments nginx-pod

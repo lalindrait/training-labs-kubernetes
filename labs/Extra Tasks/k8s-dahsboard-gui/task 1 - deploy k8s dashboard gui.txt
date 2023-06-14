@@ -1,0 +1,55 @@
+https://medium.com/@satyakommula/deploy-kubernetes-dashboard-with-nodeport-382f447d2ff8
+
+
+
+
+
+wget https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+mv recommended.yaml k8s-dashboard.yml
+
+### change the yml to include NodePort
+	kind: Service
+	apiVersion: v1
+	metadata:
+	  labels:
+	    k8s-app: kubernetes-dashboard
+	  name: kubernetes-dashboard
+	  namespace: kubernetes-dashboard
+	spec:
+	  type: NodePort
+	  ports:
+	    - port: 443
+	      targetPort: 8443
+	      nodePort: 30000
+	  selector:
+	    k8s-app: kubernetes-dashboard
+	# spec:
+	#   ports:
+	#     - port: 443
+	#       targetPort: 8443
+	#   selector:
+	#     k8s-app: kubernetes-dashboard
+
+
+
+
+kubectl apply -f k8s-dashboard.yml
+kubectl get all -n kubernetes-dashboard
+
+
+
+
+kubectl apply -f dashboard-admin.yml
+kubectl apply -f dashboard-admin-cluster-role.yml
+
+kubectl -n kubernetes-dashboard create token admin-user
+
+https://192.168.56.211:30000/
+
+
+
+
+
+
+
+

@@ -1,0 +1,82 @@
+Commands
+========================================
+
+
+
+
+
+
+kubectl cluster-info
+kubectl cluster-info dump
+kubectl get all -o wide -A
+
+
+
+
+
+
+
+
+kubectl get nodes --show-labels
+kubectl label nodes master-1 nodename=master-1
+kubectl label nodes worker-1 nodename=worker-1
+kubectl label nodes worker-2 nodename=worker-2
+
+
+
+
+
+
+
+kubectl port-forward svc/productpage 9080
+
+
+dnf install bash-completion
+source <(kubectl completion bash)
+echo "source <(kubectl completion bash)" >> ~/.bashrc
+
+
+vi .bashrc
+source .bashrc
+alias k=kubectl
+complete -o default -F __start_kubectl k
+
+
+
+
+Ctrl +, --> Open Settings JSON Icon on Top Right corner
+
+Go to Seetings.json and add following
+
+{
+    "vs-kubernetes": {
+        "disable-linters": ["resource-limits"],        
+    },
+
+
+
+
+
+
+kubectl get nodes --show-labels
+kubectl label nodes worker-1 disktype=local
+
+
+
+
+
+ctr command 
+==================
+
+ctr container list
+ctr container remove demo
+ctr image pull docker.io/library/hello-world:latest
+ctr container create docker.io/library/hello-world:latest demo
+
+
+
+
+
+
+
+

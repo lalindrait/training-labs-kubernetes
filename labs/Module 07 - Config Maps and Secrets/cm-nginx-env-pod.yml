@@ -1,0 +1,28 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: cm-nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: cmnginx
+    image: nginx:latest
+    ports:
+    - containerPort: 8080
+    env:
+    - name: env
+      valueFrom:
+        configMapKeyRef:
+          name: lv-nginx-config
+          key: env
+    - name: port
+      valueFrom:
+        configMapKeyRef:
+          name: lv-nginx-config
+          key: port
+    - name: log-size
+      valueFrom:
+        configMapKeyRef:
+          name: lv-nginx-config
+          key: log-size

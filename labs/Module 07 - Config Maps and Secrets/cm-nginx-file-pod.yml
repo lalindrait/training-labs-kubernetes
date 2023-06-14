@@ -1,0 +1,21 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: cm-nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: cmnginx
+    image: nginx:latest
+    ports:
+    - containerPort: 8080
+    volumeMounts:
+    - name: config-vol
+      mountPath: /etc/lvconfigs
+  nodeSelector:
+    disktype: local
+  volumes:
+  - name: config-vol
+    configMap:
+      name: lv-nginx-config
