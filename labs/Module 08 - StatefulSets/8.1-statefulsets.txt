@@ -1,0 +1,44 @@
+You cant ping k8s clusterIP - You cant to access the service port
+
+The resolution seems that the cluster IP cannot be pinged, but the endpoint can be access using curl with port.
+
+
+headless service only word inside the pods network. You can ping the pod IP from node but you cant resolve healdless service name from the node
+
+
+
+
+
+kubectl apply -f headless-svc.yml
+kubectl apply -f statefulset-nginx.yml
+
+
+
+kubectl get sc
+kubectl get pvc
+kubectl get pv
+
+
+kubectl get sts
+kubectl get svc
+kubectl get pods -o wide
+kubectl get all -o wide
+
+
+
+
+
+kubectl exec -it lv-nginx-sts-0 -- bash
+curl http://10.244.1.6
+curl http://lv-nginx-svc
+
+
+
+
+kubectl delete pod lv-nginx-sts-0
+kubectl get pods -o wide
+
+
+
+
+

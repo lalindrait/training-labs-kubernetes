@@ -1,0 +1,5 @@
+kubectl apply -f daemonset-nginx.yml
+
+
+kubectl get -A ds
+kubectl get pods -o wide
