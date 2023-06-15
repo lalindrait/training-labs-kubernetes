@@ -1,0 +1,21 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pv-nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: pvnginx
+    image: nginx:latest
+    ports:
+    - containerPort: 8080
+    volumeMounts:
+    - name: lv-local-vol1
+      mountPath: /usr/share/nginx/lv-vol1
+  nodeSelector:
+    disktype: local
+  volumes:
+  - name: lv-local-vol1
+    persistentVolumeClaim:
+      claimName: lv-local-claim
