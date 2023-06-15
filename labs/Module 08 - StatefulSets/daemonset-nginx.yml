@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: lv-nginx-ds
+spec:
+  selector:
+    matchLabels:
+      app: lv-web-d
+  template:
+    metadata:
+      labels:
+        app: lv-web-d
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: lv-web-d
+          image: lalindrait/lvrocky91:latest
+          ports:
+          - containerPort: 80
+            name: http
+          volumeMounts:
+          - name: lv-local-vol1
+            mountPath: /usr/share/nginx/lv-mnt
+      volumes:
+      - name: lv-local-vol1
+        persistentVolumeClaim:
+          claimName: lv-local-claim
+
+
+
+
+
+
+          
