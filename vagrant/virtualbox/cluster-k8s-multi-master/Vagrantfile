@@ -4,7 +4,8 @@
 VAGRANT_BOX_IMAGE = "generic/rocky8"
 VM_GROUP_NAME = "/VAGRANT-K8S"
 
-MASTER_NODE_CPUS = 3
+MASTER_NODE_COUNT = 3
+MASTER_NODE_CPUS = 2
 MASTER_NODE_MEMORY = 2048
 
 WORKER_NODE_COUNT = 3
@@ -16,20 +17,24 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", path: "bootstrap.sh"
 
   # Kubernetes Master Node
-  config.vm.define "master-1" do |node|
-    node.vm.box = VAGRANT_BOX_IMAGE
-    node.vm.hostname = "master-1"
-    node.disksize.size = "30GB"
-    node.vm.network :private_network, ip: "192.168.56.201"
+  (1..MASTER_NODE_COUNT).each do |masterno|
 
-    node.vm.provider :virtualbox do |vbox|
-      vbox.customize ["modifyvm", :id, "--groups", VM_GROUP_NAME]
-      vbox.customize ["modifyvm", :id, "--cpus", MASTER_NODE_CPUS]
-      vbox.customize ["modifyvm", :id, "--memory", MASTER_NODE_MEMORY]
-      vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-	  end
+    config.vm.define "master-#{masterno}" do |node|
+      node.vm.box = VAGRANT_BOX_IMAGE
+      node.vm.hostname = "master-#{masterno}"
+      node.disksize.size = "30GB"
+      node.vm.network :private_network, ip: "192.168.56.20#{masterno}"
+  
+      node.vm.provider :virtualbox do |vbox|
+        vbox.customize ["modifyvm", :id, "--groups", VM_GROUP_NAME]
+        vbox.customize ["modifyvm", :id, "--cpus", MASTER_NODE_CPUS]
+        vbox.customize ["modifyvm", :id, "--memory", MASTER_NODE_MEMORY]
+        vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      end
 
     node.vm.provision "shell", path: "bootstrap_kmaster.sh"
+
+    end
 
   end
 
@@ -48,7 +53,7 @@ Vagrant.configure("2") do |config|
         vbox.customize ["modifyvm", :id, "--memory", WORKER_NODE_MEMORY]
         vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       end
-  
+
       node.vm.provision "shell", path: "bootstrap_kworker.sh"
   
     end
