@@ -17,8 +17,6 @@ kubectl version -o yaml
 
 
 dnf list installed | grep -i kube
-
-
 kubectl -n kube-system get cm kubeadm-config -o yaml
 
 
@@ -75,7 +73,6 @@ kubectl get nodes
 
 kubectl version -o yaml
 dnf upgrade -y kubelet-1.25.11  kubectl-1.25.11
-
 systemctl daemon-reload
 systemctl restart kubelet
 
@@ -96,12 +93,60 @@ Uncordon the node
 
 
 
+kubectl apply -f nginx-deployment.yml
+kubectl get pods -o wide
 
+kubectl get nodes
+kubectl get pods -o wide
+
+
+
+
+
+# From worker node
+dnf upgrade -y kubeadm-1.25.11
+
+
+#From master node
+kubectl drain kworker-1 --ignore-daemonsets
+
+
+# From worker node
+kubeadm upgrade node
+dnf upgrade -y kubelet-1.25.11  kubectl-1.25.11
+systemctl daemon-reload
+systemctl restart kubelet
+
+
+#From master node
+kubectl uncordon kworker-1
 
 
 dnf upgrade -y kubelet-1.25.11  kubectl-1.25.11
 systemctl daemon-reload
 systemctl restart kubelet
+
+
+
+
+
+
+
+Upgraging the cluster - Backup & Restore
+========================================
+
+kubectl get all --all-namespaces -o yaml > k8s-resource-config-bkp.yaml
+
+
+# Install the etcdctl CLI
+wget https://github.com/etcd-io/etcd/releases/download/v3.5.4/etcd-v3.5.4-linux-amd64.tar.gz
+tar zxvf etcd-v3.5.4-linux-amd64.tar.gz
+mv etcd-v3.5.4-linux-amd64/etcdctl /usr/bin/
+etcdctl version
+
+
+# Take the snapshop
+ETCDCTL_API=3 etcdctl snapshot save snapshot-16062023.db
 
 
 
