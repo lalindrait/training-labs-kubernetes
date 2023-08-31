@@ -81,8 +81,8 @@ echo -e "root123\nroot123" | passwd root >/dev/null 2>&1
 
 
 echo "[TASK 10] Create user"
-useradd -p $(openssl passwd -1 lali1234) lalindra
-echo 'lalindra        ALL=(ALL)       NOPASSWD: ALL' >> /etc/sudoers
+useradd -p $(openssl passwd -1 k8s1234) k8s
+echo 'k8s        ALL=(ALL)       NOPASSWD: ALL' >> /etc/sudoers
 
 
 echo "[TASK 11] Enable auto-complete for kubectl"
