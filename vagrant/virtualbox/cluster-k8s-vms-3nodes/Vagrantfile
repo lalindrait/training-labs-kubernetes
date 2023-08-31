@@ -2,19 +2,19 @@
 # vi: set ft=ruby :
 
 VAGRANT_BOX_IMAGE = "generic/rocky8"
-VM_GROUP_NAME = "/VAGRANT-K8S-MULTINODE"
+VM_GROUP_NAME = "/VAGRANT-K8S-3NODE"
 
-MASTER_NODE_COUNT = 3
+MASTER_NODE_COUNT = 1
 MASTER_NODE_CPUS = 2
 MASTER_NODE_MEMORY = 4096
 
-WORKER_NODE_COUNT = 3
+WORKER_NODE_COUNT = 2
 WORKER_NODE_CPUS = 2
 WORKER_NODE_MEMORY = 2048
 
 Vagrant.configure("2") do |config|
 
-  config.vm.provision "shell", path: "bootstrap.sh"
+  # config.vm.provision "shell", path: "bootstrap.sh"
 
   # Kubernetes Master Node
   (1..MASTER_NODE_COUNT).each do |masterno|
@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
         vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       end
 
-    node.vm.provision "shell", path: "bootstrap_kmaster.sh"
+    # node.vm.provision "shell", path: "bootstrap_kmaster.sh"
 
     end
 
@@ -54,7 +54,7 @@ Vagrant.configure("2") do |config|
         vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       end
 
-      node.vm.provision "shell", path: "bootstrap_kworker.sh"
+      # node.vm.provision "shell", path: "bootstrap_kworker.sh"
   
     end
 
