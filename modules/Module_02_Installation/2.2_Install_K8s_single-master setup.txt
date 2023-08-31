@@ -1,12 +1,12 @@
 ======================================================================
-Installing k8s
+Installing k8s - Single Master 3 Node Cluster
 ======================================================================
 kubeadm: the command to bootstrap the cluster
 kubelet: the component that runs on all of the machines in your cluster and manage pods in the node
 kubectl: the command line util to talk to your cluster
 
 
-Step 1 - Prerequisutes (Both on Master and Workers)
+Step 1 - Prerequisites (Both on Master and Workers)
 ---------------------------------------------------
 
 1 - check OS versions are same
@@ -18,14 +18,14 @@ vi /etc/hosts
 192.168.56.201   master-1
 192.168.56.211   worker-1
 192.168.56.212   worker-2
-192.168.56.213   worker-3
+
 
 3 - Check network connectivity - Between nodes and Internet access
 ping 4.2.2.2
 192.168.56.201
 192.168.56.211
 192.168.56.212
-192.168.56.213
+
 
 
 4 - Disable swap
@@ -55,8 +55,11 @@ firewall-cmd --permanent --add-port=10251/tcp
 firewall-cmd --permanent --add-port=10255/tcp
 firewall-cmd --reload
 
+# use following to verify ports are open
+firewall-cmd --list-ports
 
-7 - Check if kernel modules are avaiable - 
+
+7 - Check if kernel modules are avaiable 
 
 verify br_netfilter & overlay modules are loaded
 
@@ -67,13 +70,13 @@ overlay - For the overlay network
 lsmod | grep br_netfilter
 lsmod | grep overlay
 
-modprobe br_netfilter; lsmod | grep br_netfilter
-modprobe overlay; lsmod | grep overlay
-
-
+#To add permanently
 vi /etc/modules-load.d/k8s.conf
 br_netfilter
 overlay
+
+modprobe br_netfilter; lsmod | grep br_netfilter
+modprobe overlay; lsmod | grep overlay
 
 8 - Check and change kernel parameters
 
@@ -88,10 +91,6 @@ sysctl --system
 9 - reboot the system to make sure systems are configured and clean before installation
 
 reboot
-
-
-
-
 
 
 Step 2 - Install kubeadm  (Both on Master and Workers)
@@ -131,7 +130,7 @@ Google repos                        : https://packages.cloud.google.com/yum/repo
                                     : https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
 
 
-
+vi /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
 baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
@@ -145,21 +144,25 @@ dnf install -y kubelet kubeadm kubectl
 systemctl enable kubelet
 
 
-
-
 Step 3 - Iinitialize cluster
 ----------------------------
 
-1 - Initialize the cluster (On master node)_
+1 - Initialize the cluster (On master node)
 
-kubeadm init --pod-network-cidr=10.10.0.0/16 --control-plane-endpoint 192.168.56.101:6443 --apiserver-advertise-address=192.168.56.101 --upload-certs
-kubeadm init --pod-network-cidr=10.10.0.0/16 --control-plane-endpoint 192.168.56.201:6443 --apiserver-advertise-address=192.168.56.201
+kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint 192.168.56.201:6443 --apiserver-advertise-address=192.168.56.201 --upload-certs
+
+
+### Can also run "kubeadm init" without arguements but it will take 10 range IP as endpoints
+### Only If init fails and you need to reset the configs before issuing another init
+	    kubeadm reset --force    
+
 
 mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
 
 kubectl get nodes
+kubectl get pods -A
 
 2 - Join the worker nodes to the cluster
 
@@ -176,42 +179,22 @@ Nodes should be in a NotReady State
 Step 4 - Setup Prod network (Only on Master)
 -------------------------------------------
 
-https://docs.tigera.io/calico/latest/getting-started/kubernetes/self-managed-onprem/onpremises#install-calico-with-kubernetes-api-datastore-50-nodes-or-less
+wget https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+vi kube-flannel.yml
+After the line  - --kube-subnet-mgr add the following line 
+- --iface=eth1' 
 
-
-
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.0/manifests/calico.yaml -O
-kubectl apply -f calico.yaml
+kubectl apply -f kube-flannel.yml
 
 kubectl get pods -A                         ### Wait until all pods are running
 kubectl get nodes                           ### Master node should be in Ready state
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ====== additional commands ===========
 
 kubeadm reset
-
+kubeadm reset --force  
 kubectl describe node
 
 
