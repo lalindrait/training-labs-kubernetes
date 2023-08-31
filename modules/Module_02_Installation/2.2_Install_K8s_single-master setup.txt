@@ -1,20 +1,9 @@
-
-
-https://www.hostafrica.ng/blog/kubernetes/kubernetes-cluster-centos-stream-containerd/
-Manual install : https://dockerlabs.collabnix.com/kubernetes/beginners/Install-and-configure-a-multi-master-Kubernetes-cluster-with-kubeadm.html
-
-
-https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
-https://devopscube.com/setup-kubernetes-cluster-kubeadm/
-
 ======================================================================
 Installing k8s
 ======================================================================
 kubeadm: the command to bootstrap the cluster
-kubelet: the component that runs on all of the machines in your cluster and does things like starting pods and containers
+kubelet: the component that runs on all of the machines in your cluster and manage pods in the node
 kubectl: the command line util to talk to your cluster
-
-
 
 
 Step 1 - Prerequisutes (Both on Master and Workers)

@@ -39,3 +39,14 @@ kubectl exec first-nginx -- hostname
 kubectl exec -it first-nginx -- bash
 
 kubectl delete pods first-nginx-pod
+
+
+==================================
+1 - Verify cluster installation
+==================================
+
+Power-off one of the worker nodes
+Observer node becoming NotReady and pods are restarted in another node
+
+kubectl get deployments
+kubectl delete deployments nginx-pod

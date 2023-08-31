@@ -1,3 +1,4 @@
+<<<<<<< HEAD:modules/Module_01_Introduction/Module_01_Introduction.txt
 1.1 - Verify cluster installation - First deployement
 ---------------------------------------------------
 
@@ -24,12 +25,32 @@ spec:
 
 
 
+=======
+==================================
+1 - Identifying cluster components
+==================================
+
+kubectl version --short
+
+kubectl cluster-info
+kubectl cluster-info dump
+
+kubectl get nodes
+>>>>>>> 952d9022eb1cfd690d27e2eea79cab24646415f0:modules/Module_01_Introduction/1.1_verify install.txt
 kubectl get nodes -o wide
 kubectl get all -o wide
-kubectl describe pod/nginx-pod-57d84f57dc-65lmj
 
+<<<<<<< HEAD:modules/Module_01_Introduction/Module_01_Introduction.txt
 ### Power-off one of the worker nodes
 ### Observer node becoming NotReady and pods are restarted in another node
 
 kubectl get deployments
 kubectl delete deployments nginx-pod
+=======
+k get pods
+k get pods -o wide
+k get pods -o wide --watch
+
+kubectl describe pod -n kube-system kube-apiserver-master-1
+kubectl get pod -n kube-system kube-apiserver-master-1 -o yaml
+>>>>>>> 952d9022eb1cfd690d27e2eea79cab24646415f0:modules/Module_01_Introduction/1.1_verify install.txt
