@@ -1,71 +1,49 @@
-
-
-https://www.hostafrica.ng/blog/kubernetes/kubernetes-cluster-centos-stream-containerd/
-
-Manual install : https://dockerlabs.collabnix.com/kubernetes/beginners/Install-and-configure-a-multi-master-Kubernetes-cluster-with-kubeadm.html
-
-
-
 ======================================================================
-Installing k8s
+Installing k8s - Single Master 3 Node Cluster
 ======================================================================
 kubeadm: the command to bootstrap the cluster
-kubelet: the component that runs on all of the machines in your cluster and does things like starting pods and containers
+kubelet: the component that runs on all of the machines in your cluster and manage pods in the node
 kubectl: the command line util to talk to your cluster
 
 
-
-
-Step 1 - Prerequisutes (Both on Master and Workers)
+Step 1 - Prerequisites (Both on Master and Workers)
 ---------------------------------------------------
 
 1 - check OS versions are same
-    cat /etc/os-release
 
-2 - Check network connectivity - Between nodes and Internet access
-    ping 4.2.2.2
-    ping 192.168.56.102
-    ping 192.168.56.103
-
-3 - Disable swap
-        vi /etc/fstab  & Comment out swap file system
-    swapoff -a              #to temporary disable
-
-4 - Disable SELINUX
-        vi /etc/sysconfig/selinux & set SELINUX=permissive or disabled
-        sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
-
-5 - Disable firewall or enable ports
+cat /etc/os-release
 
 
-dnf install epel-release
-dnf install -y ufw
-ufw --version
-ufw enable
-ufw status
+2 - Add hostnames - Update /etc/hosts file 
+
+vi /etc/hosts
+192.168.56.201   master-1
+192.168.56.211   worker-1
+192.168.56.212   worker-2
 
 
-On master nodes
----------------
-ufw allow 6443/tcp
-ufw allow 2379/tcp
-ufw allow 2380/tcp
-ufw allow 10250/tcp
-ufw allow 10251/tcp
-ufw allow 10252/tcp
-ufw allow 10255/tcp
-ufw reload
+3 - Check network connectivity - Between nodes and Internet access
 
-on worker nodes
----------------
-ufw allow 10251/tcp
-ufw allow 10255/tcp
-ufw reload
+ping 4.2.2.2
+192.168.56.201
+192.168.56.211
+192.168.56.212
 
 
 
-On master nodes
----------------
+4 - Disable swap
+
+vi /etc/fstab  & Comment out swap file system
+swapoff -a              #to temporary disable
+
+5 - Disable SELINUX
+
+vi /etc/sysconfig/selinux & set SELINUX=permissive or disabled
+sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+6 - Disable firewall or enable ports
+
+#on master nodes
 firewall-cmd --permanent --add-port=6443/tcp
 firewall-cmd --permanent --add-port=2379/tcp
 firewall-cmd --permanent --add-port=2380/tcp
@@ -75,60 +53,52 @@ firewall-cmd --permanent --add-port=10252/tcp
 firewall-cmd --permanent --add-port=10255/tcp
 firewall-cmd --reload
 
-on worker nodes
----------------
+
+#on worker nodes
+firewall-cmd --permanent --add-port=10250/tcp
 firewall-cmd --permanent --add-port=10251/tcp
 firewall-cmd --permanent --add-port=10255/tcp
 firewall-cmd --reload
 
+# use following to verify ports are open
+firewall-cmd --list-ports
 
 
+7 - Check if kernel modules are avaiable 
 
-
-
-
-6 - Add hostnames       
-        vi /etc/hosts
-        192.168.56.40   k8master
-        192.168.56.41   k8worker1
-        192.168.56.42   k8worker2
-
-7 - Check if kernel modules are avaiable - verify br_netfilter & overlay modules are loaded
+verify br_netfilter & overlay modules are loaded
 
 
 br_netfilter - This module is required to enable transparent masquerading and to facilitate Virtual Extensible LAN (VxLAN) traffic for communication between Kubernetes pods across the cluster.
-overlay - 
+overlay - For the overlay network
 
-    lsmod | grep br_netfilter
-    lsmod | grep overlay
+lsmod | grep br_netfilter
+lsmod | grep overlay
 
-    modprobe br_netfilter
-    modprobe overlay
+#To add permanently
+vi /etc/modules-load.d/k8s.conf
+br_netfilter
+overlay
 
-
-    vi /etc/modules-load.d/k8s.conf
-    br_netfilter
-    overlay
+modprobe br_netfilter; lsmod | grep br_netfilter
+modprobe overlay; lsmod | grep overlay
 
 8 - Check and change kernel parameters
 
-    sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables net.ipv4.ip_forward
+vi /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+
+sysctl --system
 
 
-    vi /etc/sysctl.d/k8s.conf
-    net.bridge.bridge-nf-call-ip6tables = 1
-    net.bridge.bridge-nf-call-iptables = 1
-    net.ipv4.ip_forward = 1
+9 - reboot the system to make sure systems are configured and clean before installation
 
-    sysctl --system
+reboot
 
 
-9 - reboot the system to make sure systems are clean before installation
-
-    reboot
-
-
-Step 2 - Install kubeadm  (Both on Master and Workers)
+Step 2 - Install kubernetes packages  (Both on Master and Workers)
 ------------------------------------------------------
 
 https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
@@ -141,31 +111,28 @@ nc 127.0.0.1 6443 - Check if the port is open
 
 
 
+1 - Install containerd
+
 dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 dnf install --allowerasing -y containerd 
 mkdir -p /etc/containerd
 containerd config default | tee /etc/containerd/config.toml
 vi /etc/containerd/config.toml 
 
-FInd the line in the flie and make it to true
+Find the line in the flie and make it to true
 [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options] ---> And change the value of SystemdCgroup to true
 
 systemctl restart containerd
+systemctl enable containerd
 ps -ef | grep containerd
 
 
-
-
-
-
-
-
-
-
+2 - Install kubeadm
 
 Official installation guide         : https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 Google repos                        : https://packages.cloud.google.com/yum/repos/
                                     : https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+
 
 vi /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
@@ -177,95 +144,92 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 
 
-
 dnf install -y kubelet kubeadm kubectl
-
 systemctl enable kubelet
 
 
+Step 3 - Iinitialize the cluster
+--------------------------------
 
-Step 3 - Iinitialize cluster
-----------------------------
+1 - Initialize the cluster (On master node)
 
-kubeadm init --pod-network-cidr=10.10.0.0/16 --control-plane-endpoint 192.168.56.101:6443 --apiserver-advertise-address=192.168.56.101 --upload-certs
+kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.56.201 --upload-certs
+
+#For high availability cluster
+kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint 192.168.56.200:6443 --apiserver-advertise-address=192.168.56.201 --upload-certs
+
+### Can also run "kubeadm init" without arguements but it will take 10 range IP as endpoints
+### Only If init fails and you need to reset the configs before issuing another init
+	    kubeadm reset --force    
+
 
 mkdir -p $HOME/.kube
 cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 chown $(id -u):$(id -g) $HOME/.kube/config
 
 kubectl get nodes
+kubectl get pods -A
+
+2 - Join the worker nodes to the cluster
+
+kubeadm join 192.168.56.201:6443 --token ux1el0.8owgc4afkkk2obrx \
+        --discovery-token-ca-cert-hash sha256:ec046f3eddc7b2b0ee90b47b3b6a09791de3b0055f4942da20def05aceace3b3
 
 
+kubectl get nodes
+kubectl get pods -A
 
-kubeadm join 192.168.56.101:6443 --token ylwedi.69bp0a0dtblra6n3 \
-        --discovery-token-ca-cert-hash sha256:1908c93271f7a631b5b669cf319027b900494669882fd712d73ebe9089aea3b7 \
-        --control-plane
-
-
-kubeadm join 192.168.56.101:6443 --token ylwedi.69bp0a0dtblra6n3 \
-        --discovery-token-ca-cert-hash sha256:1908c93271f7a631b5b669cf319027b900494669882fd712d73ebe9089aea3b7
+Nodes should be in a NotReady State
 
 
+Step 4 - Setup pod network (Only on Master)
+-------------------------------------------
 
+wget https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+vi kube-flannel.yml
+After the line  - --kube-subnet-mgr add the following line 
+- --iface=eth1' 
 
+kubectl apply -f kube-flannel.yml
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+kubectl get pods -A                         ### Wait until all pods are running
+kubectl get nodes                           ### Master node should be in Ready state
 
 
 
 ====== additional commands ===========
 
 kubeadm reset
-
+kubeadm reset --force  
 kubectl describe node
 
 
 
 
 
+====== Sample Output ===========
 
-
-
-
-
-
-[root@rocky85-master1 ~]# kubeadm init --pod-network-cidr=10.10.0.0/16 --control-plane-endpoint 192.168.56.101:6443 --apiserver-advertise-address=192.168.56.101 --upload-certs
-[init] Using Kubernetes version: v1.27.2
+[root@master-1 ~]# kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint 192.168.56.201:6443 --apiserver-advertise-address=192.168.56.201 --upload-certs
+[init] Using Kubernetes version: v1.28.1
 [preflight] Running pre-flight checks
         [WARNING Firewalld]: firewalld is active, please ensure ports [6443 10250] are open or your cluster may not function correctly
+        [WARNING FileExisting-tc]: tc not found in system path
 [preflight] Pulling images required for setting up a Kubernetes cluster
 [preflight] This might take a minute or two, depending on the speed of your internet connection
 [preflight] You can also perform this action in beforehand using 'kubeadm config images pull'
-W0602 08:34:02.904089    4003 images.go:80] could not find officially supported version of etcd for Kubernetes v1.27.2, falling back to the nearest etcd version (3.5.7-0)
-W0602 08:34:03.208657    4003 checks.go:835] detected that the sandbox image "registry.k8s.io/pause:3.6" of the container runtime is inconsistent with that used by kubeadm. It is recommended that using "registry.k8s.io/pause:3.9" as the CRI sandbox image.
+W0831 14:48:54.375903    4374 checks.go:835] detected that the sandbox image "registry.k8s.io/pause:3.6" of the container runtime is inconsistent with that used by kubeadm. It is recommended that using "registry.k8s.io/pause:3.9" as the CRI sandbox image.
 [certs] Using certificateDir folder "/etc/kubernetes/pki"
 [certs] Generating "ca" certificate and key
 [certs] Generating "apiserver" certificate and key
-[certs] apiserver serving cert is signed for DNS names [kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local rocky85-master1] and IPs [10.96.0.1 192.168.56.101]
+[certs] apiserver serving cert is signed for DNS names [kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local master-1] and IPs [10.96.0.1 192.168.56.201]
 [certs] Generating "apiserver-kubelet-client" certificate and key
 [certs] Generating "front-proxy-ca" certificate and key
 [certs] Generating "front-proxy-client" certificate and key
 [certs] Generating "etcd/ca" certificate and key
 [certs] Generating "etcd/server" certificate and key
-[certs] etcd/server serving cert is signed for DNS names [localhost rocky85-master1] and IPs [192.168.56.101 127.0.0.1 ::1]
+[certs] etcd/server serving cert is signed for DNS names [localhost master-1] and IPs [192.168.56.201 127.0.0.1 ::1]
 [certs] Generating "etcd/peer" certificate and key
-[certs] etcd/peer serving cert is signed for DNS names [localhost rocky85-master1] and IPs [192.168.56.101 127.0.0.1 ::1]
+[certs] etcd/peer serving cert is signed for DNS names [localhost master-1] and IPs [192.168.56.201 127.0.0.1 ::1]
 [certs] Generating "etcd/healthcheck-client" certificate and key
 [certs] Generating "apiserver-etcd-client" certificate and key
 [certs] Generating "sa" key and public key
@@ -274,25 +238,24 @@ W0602 08:34:03.208657    4003 checks.go:835] detected that the sandbox image "re
 [kubeconfig] Writing "kubelet.conf" kubeconfig file
 [kubeconfig] Writing "controller-manager.conf" kubeconfig file
 [kubeconfig] Writing "scheduler.conf" kubeconfig file
-[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
-[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
-[kubelet-start] Starting the kubelet
+[etcd] Creating static Pod manifest for local etcd in "/etc/kubernetes/manifests"
 [control-plane] Using manifest folder "/etc/kubernetes/manifests"
 [control-plane] Creating static Pod manifest for "kube-apiserver"
 [control-plane] Creating static Pod manifest for "kube-controller-manager"
 [control-plane] Creating static Pod manifest for "kube-scheduler"
-[etcd] Creating static Pod manifest for local etcd in "/etc/kubernetes/manifests"
-W0602 08:34:07.478674    4003 images.go:80] could not find officially supported version of etcd for Kubernetes v1.27.2, falling back to the nearest etcd version (3.5.7-0)
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Starting the kubelet
 [wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory "/etc/kubernetes/manifests". This can take up to 4m0s
-[apiclient] All control plane components are healthy after 10.004024 seconds
+[apiclient] All control plane components are healthy after 11.006997 seconds
 [upload-config] Storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
 [kubelet] Creating a ConfigMap "kubelet-config" in namespace kube-system with the configuration for the kubelets in the cluster
 [upload-certs] Storing the certificates in Secret "kubeadm-certs" in the "kube-system" Namespace
 [upload-certs] Using certificate key:
-fc236ee72d99d831a232563db855d6d4c46e74bf1bde7039dbec1c0f620a47eb
-[mark-control-plane] Marking the node rocky85-master1 as control-plane by adding the labels: [node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers]
-[mark-control-plane] Marking the node rocky85-master1 as control-plane by adding the taints [node-role.kubernetes.io/control-plane:NoSchedule]
-[bootstrap-token] Using token: m0f2gt.862fncc3x9c26rpt
+c308457f9416409e67816c9b77e47dc5cbdb4c369adb735c5fdab158fba34141
+[mark-control-plane] Marking the node master-1 as control-plane by adding the labels: [node-role.kubernetes.io/control-plane node.kubernetes.io/exclude-from-external-load-balancers]
+[mark-control-plane] Marking the node master-1 as control-plane by adding the taints [node-role.kubernetes.io/control-plane:NoSchedule]
+[bootstrap-token] Using token: zxjaqm.ru222i39wdez7ezr
 [bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
 [bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to get nodes
 [bootstrap-token] Configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
@@ -321,9 +284,9 @@ Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
 
 You can now join any number of the control-plane node running the following command on each as root:
 
-  kubeadm join 192.168.56.101:6443 --token m0f2gt.862fncc3x9c26rpt \
-        --discovery-token-ca-cert-hash sha256:b290fa88160c1765c78494a58549b12b89df5023a68b18009d3df6177ec32f30 \
-        --control-plane --certificate-key fc236ee72d99d831a232563db855d6d4c46e74bf1bde7039dbec1c0f620a47eb
+  kubeadm join 192.168.56.201:6443 --token zxjaqm.ru222i39wdez7ezr \
+        --discovery-token-ca-cert-hash sha256:11de10069c9ed7a38063c661b2d2385f7b9d9987d9a9ec5baa67d51d210a6248 \
+        --control-plane --certificate-key c308457f9416409e67816c9b77e47dc5cbdb4c369adb735c5fdab158fba34141
 
 Please note that the certificate-key gives access to cluster sensitive data, keep it secret!
 As a safeguard, uploaded-certs will be deleted in two hours; If necessary, you can use
@@ -331,11 +294,7 @@ As a safeguard, uploaded-certs will be deleted in two hours; If necessary, you c
 
 Then you can join any number of worker nodes by running the following on each as root:
 
-kubeadm join 192.168.56.101:6443 --token m0f2gt.862fncc3x9c26rpt \
-        --discovery-token-ca-cert-hash sha256:b290fa88160c1765c78494a58549b12b89df5023a68b18009d3df6177ec32f30
-[root@rocky85-master1 ~]#
-[root@rocky85-master1 ~]#
-
-
-
+kubeadm join 192.168.56.201:6443 --token zxjaqm.ru222i39wdez7ezr \
+        --discovery-token-ca-cert-hash sha256:11de10069c9ed7a38063c661b2d2385f7b9d9987d9a9ec5baa67d51d210a6248
+[root@master-1 ~]#
 
