@@ -1,0 +1,33 @@
+
+### Initialize a Project Directory
+vagrant init 
+
+### Bring up a vagrant environment								
+vagrant up 		
+
+### View satus of the current local environment
+vagrant status
+
+
+### Destroy a vagrant enviornrment - power off and delete vms
+vagrant destroy
+vagrant destroy -f
+
+### HashiCorp's Vagrant Cloud box catalog
+https://app.vagrantup.com/boxes/search
+
+### List boxes in the local node
+vagrant box list
+vagrant box add bento/centos-7.3 --provider=virtualbox
+
+### connect to a vagrant box using ssh
+vagrant ssh master-1
+
+### Pause the current box.
+vagrant suspend master-1
+
+### Resume the current box
+vagrant resume master-1
+
+### Shutdown the current box
+vagrant halt master-1
