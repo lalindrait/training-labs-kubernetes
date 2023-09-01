@@ -85,6 +85,9 @@ modprobe overlay; lsmod | grep overlay
 
 8 - Check and change kernel parameters
 
+net.bridge.bridge-nf-call-ip6tables - Determine whether packets crossing a bridge are sent to iptables for processing. Most Kubernetes CNIs rely on iptables, so this is usually necessary for Kubernetes.
+net.ipv4.ip_forward - Enable IP forwarding in the kernel
+
 vi /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
@@ -103,12 +106,11 @@ Step 2 - Install kubernetes packages  (Both on Master and Workers)
 
 https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 
-Ensure the Prerequisutes are met
+Ensure the Prerequisites are met
 
 ip link - MAC Address
 cat /sys/class/dmi/id/product_uuid - check product_uuid
 nc 127.0.0.1 6443 - Check if the port is open
-
 
 
 1 - Install containerd
@@ -127,7 +129,7 @@ systemctl enable containerd
 ps -ef | grep containerd
 
 
-2 - Install kubeadm
+2 - Install k8s packages
 
 Official installation guide         : https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 Google repos                        : https://packages.cloud.google.com/yum/repos/
