@@ -24,7 +24,7 @@ kubeadm config images pull --kubernetes-version $K8S_VERSION >/dev/null 2>&1
 
 
 echo "[TASK 3] Initialize Kubernetes Cluster"
-kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint 192.168.56.201:6443 --apiserver-advertise-address=192.168.56.201 --kubernetes-version $K8S_VERSION >> /root/kubeinit.log 2>/dev/null
+kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.56.201 --kubernetes-version $K8S_VERSION >> /root/kubeinit.log 2>/dev/null
 
 
 echo "[TASK 4] Deploy Flannel network"

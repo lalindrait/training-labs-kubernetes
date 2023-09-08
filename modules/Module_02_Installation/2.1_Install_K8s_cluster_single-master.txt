@@ -51,6 +51,10 @@ firewall-cmd --permanent --add-port=10250/tcp
 firewall-cmd --permanent --add-port=10251/tcp
 firewall-cmd --permanent --add-port=10252/tcp
 firewall-cmd --permanent --add-port=10255/tcp
+firewall-cmd --permanent --add-port=8285/udp 
+firewall-cmd --permanent --add-port=8472/udp
+firewall-cmd --permanent --add-port=30000-32767/tcp
+firewall-cmd --add-masquerade --permanent
 firewall-cmd --reload
 
 
@@ -58,6 +62,10 @@ firewall-cmd --reload
 firewall-cmd --permanent --add-port=10250/tcp
 firewall-cmd --permanent --add-port=10251/tcp
 firewall-cmd --permanent --add-port=10255/tcp
+firewall-cmd --permanent --add-port=8285/udp
+firewall-cmd --permanent --add-port=8472/udp
+firewall-cmd --permanent --add-port=30000-32767/tcp
+firewall-cmd --add-masquerade --permanent
 firewall-cmd --reload
 
 # use following to verify ports are open
@@ -77,8 +85,8 @@ lsmod | grep overlay
 
 #To add permanently
 vi /etc/modules-load.d/k8s.conf
-br_netfilter
-overlay
+
+
 
 modprobe br_netfilter; lsmod | grep br_netfilter
 modprobe overlay; lsmod | grep overlay
@@ -190,7 +198,7 @@ Step 4 - Setup pod network (Only on Master)
 wget https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 vi kube-flannel.yml
 After the line  - --kube-subnet-mgr add the following line 
-- --iface=eth1' 
+- --iface=eth1 
 
 kubectl apply -f kube-flannel.yml
 
@@ -204,7 +212,7 @@ kubectl get nodes                           ### Master node should be in Ready s
 kubeadm reset
 kubeadm reset --force  
 kubectl describe node
-
+kubeadm certs check-expiration
 
 
 
