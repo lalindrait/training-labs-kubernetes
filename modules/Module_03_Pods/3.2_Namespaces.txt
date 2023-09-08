@@ -1,0 +1,15 @@
+======================================================================
+Creating namespaces
+======================================================================
+
+kubectl get ns
+
+kubectl api-resources
+kubectl describe ns default
+
+kubectl apply -f first-namespace.yml
+kubectl get ns
+
+
+
+
