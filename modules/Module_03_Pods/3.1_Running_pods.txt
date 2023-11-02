@@ -24,7 +24,7 @@ metadata:
 spec:
   containers:
   - name: lvnginx
-    image: lalindrait/lvrocky91:1.0
+    image: lalindrait/lvnginx:1.0
     ports:
     - containerPort: 8080
 
@@ -43,3 +43,43 @@ kubectl create -f lvpod.yaml
 kubectl create -f lvpod.yaml
 kubectl delete pod lvnginx
 kubectl delete -f lvpod.yaml
+
+
+======================================================================
+Running a multi-container pods
+======================================================================
+
+### use the lv-multicontainer-pod-1.yml
+
+
+kubectl apply -f lv-multicontainer-pod.yml
+kubectl get pods -o wide --watch
+kubectl exec -it lv-nginx-multipod -c lvnginx -- /bin/bash
+curl localhost
+
+cat /proc/mounts  | grep nginxcd
+cat /usr/share/nginx/html/index.html
+
+
+### use the lv-multicontainer-pod-2.yml
+kubectl apply -f lv-multicontainer-pod.yml
+kubectl get pods -o wide --watch
+kubectl exec -it lv-nginx-multipod -c lvnginx -- /bin/bash
+curl localhost
+kubectl exec -it lv-nginx-multipod -c lvrocky -- /bin/bash
+
+### From inside the containers
+ip addr
+ps -ef
+
+### Execute on a worker node
+ps -ef | grep pause
+
+======================================================================
+Commands
+======================================================================
+
+kubectl explain pods --recursive
+kubectl explain pod.spec.restartPolicy
+kubectl explain pod.spec.affinity.nodeAffinity
+kubectl explain pod.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution

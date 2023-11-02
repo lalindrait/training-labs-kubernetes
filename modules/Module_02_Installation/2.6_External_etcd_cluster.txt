@@ -1,0 +1,230 @@
+Steap 1 - Install cfssl
+========================
+
+https://github.com/cloudflare/cfssl/releases
+
+
+wget https://github.com/cloudflare/cfssl/releases/download/v1.6.4/cfssl_1.6.4_linux_amd64
+wget https://github.com/cloudflare/cfssl/releases/download/v1.6.4/cfssljson_1.6.4_linux_amd64
+
+chmod +x cfssl_1.6.4_linux_amd64
+chmod +x cfssljson_1.6.4_linux_amd64
+
+mv cfssl_1.6.4_linux_amd64 /usr/local/bin/cfssl
+mv cfssljson_1.6.4_linux_amd64 /usr/local/bin/cfssljson
+
+cfssl version
+
+
+
+Step 2 - Create CA and host certificates
+========================================
+
+
+### Create a Certificate Authority (CA)
+
+
+vi ca-config.json
+{
+    "signing": {
+        "default": {
+            "expiry": "8760h"
+        },
+        "profiles": {
+            "etcd": {
+                "expiry": "8760h",
+                "usages": ["signing","key encipherment","server auth","client auth"]
+            }
+        }
+    }
+}
+
+
+
+vi cat ca-csr.json
+{
+  "CN": "etcd cluster",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "LK",
+      "L": "colombo",
+      "O": "lv",
+      "OU": "etcd",
+      "ST": "western"
+    }
+  ]
+}
+
+
+cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+
+
+File output should look like the following
+------------------------------------------
+[root@etcd-1 etcd]# ll
+total 20
+-rw-r--r--. 1 root root  277 Nov  1 07:50 ca-config.json
+-rw-r--r--. 1 root root 1001 Nov  1 07:54 ca.csr
+-rw-r--r--. 1 root root  207 Nov  1 07:52 ca-csr.json
+-rw-------. 1 root root 1675 Nov  1 07:54 ca-key.pem
+-rw-r--r--. 1 root root 1306 Nov  1 07:54 ca.pem
+[root@etcd-1 etcd]#
+
+
+
+
+Step 3 - Create TLS host certificates
+=====================================
+
+vi etcd-csr.json
+{
+  "CN": "etcd",
+  "hosts": [
+    "localhost",
+    "127.0.0.1",
+    "192.168.1.221",
+    "192.168.1.222",
+    "192.168.1.223"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "LK",
+      "L": "colombo",
+      "O": "lv",
+      "OU": "etcd",
+      "ST": "western"
+    }
+  ]
+}
+
+
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=etcd etcd-csr.json | cfssljson -bare etcd
+
+File output should look like the following
+------------------------------------------
+[root@etcd-1 etcd]# ll
+total 36
+-rw-r--r--. 1 root root  277 Nov  1 07:50 ca-config.json
+-rw-r--r--. 1 root root 1001 Nov  1 07:54 ca.csr
+-rw-r--r--. 1 root root  207 Nov  1 07:52 ca-csr.json
+-rw-------. 1 root root 1675 Nov  1 07:54 ca-key.pem
+-rw-r--r--. 1 root root 1306 Nov  1 07:54 ca.pem
+-rw-r--r--. 1 root root 1074 Nov  1 10:28 etcd.csr
+-rw-r--r--. 1 root root  313 Nov  1 10:27 etcd-csr.json
+-rw-------. 1 root root 1679 Nov  1 10:28 etcd-key.pem
+-rw-r--r--. 1 root root 1444 Nov  1 10:28 etcd.pem
+[root@etcd-1 etcd]#
+
+
+
+
+
+Step 4 - Copy certificates to all etcd hosts
+============================================
+
+mkdir -p /etc/etcd/pki
+scp ca.pem etcd.pem etcd-key.pem /etc/etcd/pki/ 192.168.1.222:/etc/etcd/pki/
+
+
+
+
+Step 5 - Install etcd
+=====================
+
+https://github.com/etcd-io/etcd/releases
+
+wget https://github.com/etcd-io/etcd/releases/download/v3.5.10/etcd-v3.5.10-linux-amd64.tar.gz
+tar -zxf etcd-v3.5.10-linux-amd64.tar.gz
+mv etcd-v3.5.10-linux-amd64/etcd* /usr/local/bin/
+chmod +x /usr/local/bin/etcd*
+
+
+# Open the following ports
+firewall-cmd --permanent --add-port=2379/tcp
+firewall-cmd --permanent --add-port=2380/tcp
+firewall-cmd --reload
+firewall-cmd --list-ports
+
+
+
+
+
+Step 6 - Create etcd service
+============================
+
+vi /etc/etcd/etcd
+
+
+ETCD_NAME=etcd-1
+ETCD_DATA_DIR=/var/lib/etcd
+ETCD_LISTEN_CLIENT_URLS=https://192.168.1.221:2379,https://127.0.0.1:2379
+ETCD_LISTEN_PEER_URLS=https://192.168.1.221:2380
+ETCD_ADVERTISE_CLIENT_URLS=https://192.168.1.221:2379
+ETCD_INITIAL_ADVERTISE_PEER_URLS=https://192.168.1.221:2380
+ETCD_INITIAL_CLUSTER=etcd-1=https://192.168.1.221:2380,etcd-2=https://192.168.1.222:2380,etcd-3=https://192.168.1.223:2380
+ETCD_INITIAL_CLUSTER_STATE=new
+ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster
+ETCD_CLIENT_CERT_AUTH=true
+ETCD_TRUSTED_CA_FILE=/etc/etcd/pki/ca.pem         
+ETCD_CERT_FILE=/etc/etcd/pki/etcd.pem             
+ETCD_KEY_FILE=/etc/etcd/pki/etcd-key.pem          
+ETCD_PEER_CLIENT_CERT_AUTH=true
+ETCD_PEER_TRUSTED_CA_FILE=/etc/etcd/pki/ca.pem    
+ETCD_PEER_CERT_FILE=/etc/etcd/pki/etcd.pem        
+ETCD_PEER_KEY_FILE=/etc/etcd/pki/etcd-key.pem     
+
+
+
+
+vi /etc/systemd/system/etcd.service
+
+[Unit]
+Description=etcd
+
+[Service]
+Type=notify
+EnvironmentFile=/etc/etcd/etcd
+ExecStart=/usr/local/bin/etcd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+systemctl daemon-reload
+systemctl enable etcd
+systemctl start etcd
+
+systemctl status etcd
+journalctl -u etcd -f
+
+
+
+
+Step 7 - Verify the cluster
+===========================
+
+etcdctl --endpoints=http://127.0.0.1:2379 member list
+
+
+vi .bash_profile
+export ETCDCTL_API=3 
+export ETCDCTL_ENDPOINTS=https://192.168.1.221:2379,https://192.168.1.222:2379,https://192.168.1.223:2379
+export ETCDCTL_CACERT=/etc/etcd/pki/ca.pem
+export ETCDCTL_CERT=/etc/etcd/pki/etcd.pem
+export ETCDCTL_KEY=/etc/etcd/pki/etcd-key.pem
+
+
+etcdctl member list
+etcdctl endpoint status
+etcdctl endpoint health

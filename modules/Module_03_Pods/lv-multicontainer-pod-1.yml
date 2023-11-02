@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lv-nginx-multipod
+spec:
+  restartPolicy: Never
+  volumes:
+  - name: shared-data
+    emptyDir: {}
+  containers:
+  - name: lvnginx
+    image: lalindrait/lvrocky91:1.0
+    volumeMounts:
+    - name: shared-data
+      mountPath: /usr/share/nginx/html
+  - name: ubuntu
+    image: ubuntu
+    volumeMounts:
+    - name: shared-data
+      mountPath: /pod-data
+    command: ["/bin/sh", "-c"]
+    args: ["echo Hello, World!!! > /pod-data/index.html"]

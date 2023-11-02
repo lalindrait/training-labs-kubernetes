@@ -1,15 +1,14 @@
 ======================================================================
-Creating namespaces
+Working with namespaces
 ======================================================================
 
 kubectl get ns
-
-kubectl api-resources
 kubectl describe ns default
+kubectl api-resources
 
 kubectl apply -f first-namespace.yml
 kubectl get ns
+kubectl describe ns lvapps
 
-
-
-
+kubectl apply -f lv-multicontainer-pod-1.yml -n lvapps
+kubectl get pods -n lvapps

@@ -1,0 +1,40 @@
+Install HAProxy
+===============
+
+dnf install haproxy –y
+
+systemctl enable haproxy
+systemctl start haproxy
+systemctl status haproxy
+journalctl -u haproxy –f
+
+
+
+
+Configure HAProxy
+=================
+
+vi /etc/haproxy/haproxy.cfg
+
+frontend k8s
+    bind 192.168.1.101:6443
+    option tcplog
+    mode tcp
+    default_backend k8s-master-nodes
+
+backend k8s-master-nodes
+    mode tcp
+    balance roundrobin
+    option tcp-check
+    server master-1 192.168.1.201:6443 check fall 3 rise 2
+    server master-2 192.168.1.202:6443 check fall 3 rise 2
+    server master-3 192.168.1.203:6443 check fall 3 rise 2
+
+systemctl reload haproxy
+
+
+
+Verify the setup
+=================
+### Verify its running and listening on the ports
+netstat -ntlp

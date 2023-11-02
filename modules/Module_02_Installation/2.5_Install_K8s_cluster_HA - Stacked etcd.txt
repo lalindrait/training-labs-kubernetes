@@ -166,12 +166,15 @@ Step 3 - Iinitialize the cluster
 
 1 - Initialize the cluster (On master node)
 
-### For single master cluster execute the following
-kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.1.201 --upload-certs
+### For high availability (multi-master) cluster execute the following
+### --control-plane-endpoint  is the Ip of the load balancer
+kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint 192.168.1.101:6443 --apiserver-advertise-address=192.168.1.201 --upload-certs
+
+
 
 ### Can also run "kubeadm init" without arguements but it will take 10 range IP as endpoints
 ### Only If init fails and you need to reset the configs before issuing another init
-	    kubeadm reset --force    
+      kubeadm reset --force    
 
 
 mkdir -p $HOME/.kube
@@ -181,7 +184,20 @@ chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl get nodes
 kubectl get pods -A
 
-2 - Join the worker nodes to the cluster
+
+2 - Join other master nodes to the cluster
+
+
+### To join a new master node 
+### First you need to create a new key for the control plane and issue join command with the cert key
+
+kubeadm init phase upload-certs --upload-certs
+kubeadm token create --print-join-command --certificate-key a810f324d26d71af984c398beee788169e3ab2300d8aa7a5b9f22b3cae0683af
+
+kubeadm join 192.168.1.101:6443 --token qpri8e.xisdhzutuhjs6ygh --discovery-token-ca-cert-hash sha256:900a4a90996ef58e963e30b3fca70d312b9b6a396727b38436a4101447ab5e1d --control-plane --certificate-key a094910842a0fc8a26aec17e5cd6bf1d8781628dad4a88a32cfc59423609efc0
+
+
+3 - Join the worker nodes to the cluster
 
 kubeadm join 192.168.56.201:6443 --token ux1el0.8owgc4afkkk2obrx \
         --discovery-token-ca-cert-hash sha256:ec046f3eddc7b2b0ee90b47b3b6a09791de3b0055f4942da20def05aceace3b3
@@ -192,6 +208,7 @@ kubectl describe node
 kubectl get pods -A
 
 Nodes should be in a NotReady State
+
 
 
 Step 4 - Setup pod network (Only on Master)
@@ -221,10 +238,27 @@ kubeadm reset --force
 ### To join a new worker node
 kubeadm token create --print-join-command
 
+### To join a new master node 
+### First you need to create a new key for the control plane and issue join command with the cert key
+kubeadm init phase upload-certs --upload-certs
+kubeadm token create --print-join-command --certificate-key a810f324d26d71af984c398beee788169e3ab2300d8aa7a5b9f22b3cae0683af
+
+
+kubeadm join 192.168.1.101:6443 --token qpri8e.xisdhzutuhjs6ygh --discovery-token-ca-cert-hash sha256:900a4a90996ef58e963e30b3fca70d312b9b6a396727b38436a4101447ab5e1d --control-plane --certificate-key a094910842a0fc8a26aec17e5cd6bf1d8781628dad4a88a32cfc59423609efc0
+
 kubeadm token list
 kubectl get secrets -A
 kubectl get configmaps -A
 kubectl describe -n kube-system secrets kubeadm-certs
+
+
+### Scaling corends pods
+kubectl describe deployment.apps -n kube-system coredns
+kubectl scale deployments.apps -n kube-system coredns --replicas=3
+
+
+#print the default static configuration that kubeadm uses for kubeadm init and kubeadm join
+kubeadm config print init-defaults
 
 
 ### Scaling corends pods
