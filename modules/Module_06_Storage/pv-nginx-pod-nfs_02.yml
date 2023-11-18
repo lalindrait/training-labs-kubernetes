@@ -16,8 +16,8 @@ spec:
   nodeSelector:
     hostname: worker-1
   volumes:
-  - name: lv-local-vol1
+  - name: lv-nfs-vol1
     nfs:
       server: 192.168.1.101
       path: /mnt/nfs-shares/lv-nfs-vol1
-      readOnly: true
+      readOnly: false
