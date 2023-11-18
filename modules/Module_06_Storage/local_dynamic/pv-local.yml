@@ -4,7 +4,7 @@ metadata:
   name: lv-local-pv
 spec:
   capacity:
-    storage: 10G
+    storage: 1G
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain

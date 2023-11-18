@@ -13,8 +13,6 @@ spec:
     volumeMounts:
     - name: lv-local-vol1
       mountPath: /usr/share/nginx/lv-vol1
-  nodeSelector:
-    disktype: local
   volumes:
   - name: lv-local-vol1
     persistentVolumeClaim:

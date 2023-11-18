@@ -8,4 +8,4 @@ spec:
   storageClassName: lv-local-storage
   resources:
     requests:
-      storage: 10G
+      storage: 1G
