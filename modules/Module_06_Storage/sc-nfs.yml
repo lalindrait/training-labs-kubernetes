@@ -1,0 +1,9 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: lv-nfs-01
+provisioner: example.com/external-nfs
+parameters:
+  server: 192.168.1.101
+  path: /share
+  readOnly: "false"
