@@ -1,25 +1,19 @@
 ======================================================================
-Running Pods with NFS mounts - Direct Mounts
+Running Pods with NFS mounts - Dynamic using subdir
 ======================================================================
 
-### Create the NFS mount in the nfs server
+### Create and export a directory in the nfs server
 
-### Create the PV spec
 
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: lv-nfs-vol2
-spec:
-  storageClassName: nfs
-  capacity:
-    storage: 1Gi
-  accessModes:
-  - ReadWriteOnce  
-  nfs:
-    path: /mnt/nfs-shares/lv-nfs-vol2
-    server: 192.168.1.101
-    readOnly: false
+### Install helm
+
+$ helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+$ helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+    --set nfs.server=192.168.1.101\
+    --set nfs.path=/mnt/nfs-shares-provider
+
+# This should deploy the pod and sc. Use following to verify
+kubectl get sc
 
 
 
@@ -28,14 +22,16 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: lv-nfs-vol2-claim
+  name: lv-nfs-vol3-claim
 spec:
   accessModes:
   - ReadWriteOnce
-  storageClassName: nfs
+  storageClassName: nfs-client
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi
+
+
 
 
 
@@ -54,26 +50,12 @@ spec:
     ports:
     - containerPort: 8080
     volumeMounts:
-    - name: lv-nfs-vol2
+    - name: lv-nfs-vol3
       mountPath: /mnt
   volumes:
-  - name: lv-nfs-vol2
+  - name: lv-nfs-vol3
     persistentVolumeClaim:
-        claimName: lv-nfs-vol2-claim
-
-
-### Run the pod
-    kubectl apply -f pv-nfs.yml
-    kubectl get pv
-    kubectl describe pv lv-nfs-vol2
-
-    kubectl apply -f pvc-nfs.yml
-    kubectl get pvc
-    kubectl describe pvc
-
-    kubectl apply -f pv-nginx-pod-nfs_02.yml
-    kubectl get pods
-    kubectl describe pod pv-nginx
+        claimName: lv-nfs-vol3-claim
 
 
 
@@ -89,4 +71,15 @@ spec:
     chmod -R 777 /mnt/nfs-shares
 
 # Verify the file is created in the NFS server
-    ls -l /mnt/nfs-shares/lv-nfs-vol2/
+    ls -l /mnt/nfs-shares-provider/default-lv-nfs-vol3-claim-pvc-73f9d580-046f-4f86-9bdb-5edae8f912cf
+
+
+
+
+
+
+
+
+
+
+
