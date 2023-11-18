@@ -1,0 +1,21 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pv-nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: pvnginx
+    image: nginx:latest
+    ports:
+    - containerPort: 8080
+    volumeMounts:
+    - name: lv-nfs-vol2
+      mountPath: /mnt
+  nodeSelector:
+    hostname: worker-1
+  volumes:
+  - name: lv-nfs-vol1
+    persistentVolumeClaim:
+      claimName: lv-nfs-vol2-claim
