@@ -11,9 +11,9 @@ spec:
     ports:
     - containerPort: 8080
     volumeMounts:
-    - name: lv-local-vol1
-      mountPath: /usr/share/nginx/lv-vol1
+    - name: lv-nfs-vol2
+      mountPath: /mnt
   volumes:
-  - name: lv-local-vol1
+  - name: lv-nfs-vol2
     persistentVolumeClaim:
-      claimName: lv-local-claim
+        claimName: lv-nfs-vol2-claim

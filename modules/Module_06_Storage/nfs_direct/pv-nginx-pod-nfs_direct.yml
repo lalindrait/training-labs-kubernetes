@@ -13,8 +13,6 @@ spec:
     volumeMounts:
     - name: lv-nfs-vol1
       mountPath: /mnt
-  nodeSelector:
-    hostname: worker-1
   volumes:
   - name: lv-nfs-vol1
     nfs:

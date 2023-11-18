@@ -1,0 +1,44 @@
+======================================================================
+Running Pods with NFS mounts - Direct Mounts
+======================================================================
+
+
+### Create the pod spec
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pv-nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: pvnginx
+    image: nginx:latest
+    ports:
+    - containerPort: 8080
+    volumeMounts:
+    - name: lv-nfs-vol1
+      mountPath: /mnt
+  volumes:
+  - name: lv-nfs-vol1
+    nfs:
+      server: 192.168.1.101
+      path: /mnt/nfs-shares/lv-nfs-vol1
+      readOnly: false
+
+
+### Run the pod
+    kubectl apply -f pv-nginx-pod-nfs_02.yml
+
+
+### Verify
+    kubectl exec -it pv-nginx -- /bin/bash
+
+# From inside the pod
+    df -h
+    touch /mnt/testfile.txt
+
+# Verify the file is created in the NFS server
+
+
