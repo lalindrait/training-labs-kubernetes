@@ -1,0 +1,20 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pv-nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: pvnginx
+    image: nginx:latest
+    ports:
+    - containerPort: 8080
+    volumeMounts:
+    - name: lv-hostpath-vol1
+      mountPath: /mnt
+  volumes:
+  - name: lv-hostpath-vol1
+    hostPath:
+      path: /mnt/host-vol1
+      type: Directory
