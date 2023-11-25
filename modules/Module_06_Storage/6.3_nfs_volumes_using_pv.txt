@@ -4,8 +4,7 @@ Running Pods with NFS mounts - Direct Mounts
 
 ### Create the NFS mount in the nfs server
 
-### Create the PV
-
+### Create the PV manifest
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -20,6 +19,21 @@ spec:
     path: /mnt/nfs-shares/lv-nfs-vol2
     server: 192.168.1.101
     readOnly: false
+
+
+### Create * verify the PV
+kubectl apply -f pv-nfs.yml
+kubectl get pv
+kubectl describe pv lv-nfs-vol2
+
+
+
+
+
+### Create the PVC manifest
+
+
+
 
 
 
@@ -65,7 +79,7 @@ spec:
 
 
 ======================================================================
-Running Pods with NFS mounts - Using PVs
+Other Commands
 ======================================================================
 
 
