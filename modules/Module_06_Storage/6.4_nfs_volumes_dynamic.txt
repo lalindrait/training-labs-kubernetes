@@ -1,0 +1,85 @@
+======================================================================
+Running Pods with NFS mounts - Dynamic using subdir
+======================================================================
+
+### Create and export a directory in the nfs server
+
+
+### Install helm
+
+$ helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+$ helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+    --set nfs.server=192.168.1.101\
+    --set nfs.path=/mnt/nfs-shares-provider
+
+# This should deploy the pod and sc. Use following to verify
+kubectl get sc
+
+
+
+### Create the PVC spec
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lv-nfs-vol3-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: nfs-client
+  resources:
+    requests:
+      storage: 2Gi
+
+
+
+
+
+### Create the pod spec
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pv-nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: pvnginx
+    image: nginx:latest
+    ports:
+    - containerPort: 8080
+    volumeMounts:
+    - name: lv-nfs-vol3
+      mountPath: /mnt
+  volumes:
+  - name: lv-nfs-vol3
+    persistentVolumeClaim:
+        claimName: lv-nfs-vol3-claim
+
+
+
+### Verify
+    kubectl exec -it pv-nginx -- /bin/bash
+
+# From inside the pod
+    df -h
+    touch /mnt/testfile.txt
+
+    # if permission denied do the following
+    chown -R nobody:nobody /mnt/nfs-shares
+    chmod -R 777 /mnt/nfs-shares
+
+# Verify the file is created in the NFS server
+    ls -l /mnt/nfs-shares-provider/default-lv-nfs-vol3-claim-pvc-73f9d580-046f-4f86-9bdb-5edae8f912cf
+
+
+
+
+
+
+
+
+
+
+

@@ -4,13 +4,14 @@ Running Pods with NFS mounts - Direct Mounts
 
 ### Create the NFS mount in the nfs server
 
-### Create the PV manifest
+### Create the PV spec
+
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: lv-nfs-vol2
 spec:
-  storageClassName: manual
+  storageClassName: nfs
   capacity:
     storage: 1Gi
   accessModes:
@@ -36,6 +37,49 @@ kubectl describe pv lv-nfs-vol2
 
 
 
+### Create * verify the PV
+kubectl apply -f pv-nfs.yml
+kubectl get pv
+kubectl describe pv lv-nfs-vol2
+
+
+
+
+
+### Create the PVC manifest
+
+
+
+
+
+
+### Create the PVC spec
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lv-nfs-vol2-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: nfs
+  resources:
+    requests:
+      storage: 1Gi
+
+### Create the PVC spec
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lv-nfs-vol2-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: nfs
+  resources:
+    requests:
+      storage: 1Gi
 
 
 
@@ -54,18 +98,27 @@ spec:
     ports:
     - containerPort: 8080
     volumeMounts:
-    - name: lv-nfs-vol1
+    - name: lv-nfs-vol2
       mountPath: /mnt
   volumes:
-  - name: lv-nfs-vol1
-    nfs:
-      server: 192.168.1.101
-      path: /mnt/nfs-shares/lv-nfs-vol1
-      readOnly: false
+  - name: lv-nfs-vol2
+    persistentVolumeClaim:
+        claimName: lv-nfs-vol2-claim
 
 
 ### Run the pod
+    kubectl apply -f pv-nfs.yml
+    kubectl get pv
+    kubectl describe pv lv-nfs-vol2
+
+    kubectl apply -f pvc-nfs.yml
+    kubectl get pvc
+    kubectl describe pvc
+
     kubectl apply -f pv-nginx-pod-nfs_02.yml
+    kubectl get pods
+    kubectl describe pod pv-nginx
+
 
 
 ### Verify
@@ -75,11 +128,15 @@ spec:
     df -h
     touch /mnt/testfile.txt
 
+    # if permission denied do the following
+    chown -R nobody:nobody /mnt/nfs-shares
+    chmod -R 777 /mnt/nfs-shares
+
 # Verify the file is created in the NFS server
 
 
 ======================================================================
-Other Commands
+Running Pods with NFS mounts - Using PVs
 ======================================================================
 
 
