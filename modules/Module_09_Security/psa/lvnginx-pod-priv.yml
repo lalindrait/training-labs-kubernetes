@@ -1,0 +1,14 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: lvnginx-priv
+  labels:
+    app: lvnginx-priv
+spec:
+  containers:
+  - name: lvnginx
+    image: lalindrait/lvnginx:1.0
+    ports:
+    - containerPort: 8080
+    securityContext:
+      privileged: true

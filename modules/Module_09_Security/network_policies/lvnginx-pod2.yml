@@ -1,0 +1,21 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: lvnginx2
+  labels:
+    app: lvnginx2
+spec:
+  containers:
+  - name: lvnginx
+    image: lalindrait/lvnginx:1.0
+    ports:
+    - containerPort: 8080
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: nodename
+            operator: In
+            values:
+            - worker-2 

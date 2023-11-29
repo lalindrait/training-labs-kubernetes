@@ -1,41 +1,20 @@
 3.2 - Running your first service
 ---------------------------------
 
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: lv-nginx-svc
-  labels:
-    app: lv-app
-spec:
-  type: NodePort
-  ports:
-  - targetPort: 80
-    port: 80
-    nodePort: 30001
-    protocol: TCP
-  selector:
-    app: lv-app
-
-
-
-
-
-
-
 kubectl apply -f first-service.yml
 kubectl get svc
 
 kubectl get all -o wide
 kubectl describe service/lv-nginx-svc
+kubectl describe service lv-nginx-svc
 
 kubectl delete service lv-nginx-svc
 
-
-
 kubectl get endpointslices
 kubectl describe endpointslice lv-nginx-svc-j55qx
+
+
+nc 192.168.1.242 30001
 
 
 firewall-cmd --permanent --add-port=30001/tcp

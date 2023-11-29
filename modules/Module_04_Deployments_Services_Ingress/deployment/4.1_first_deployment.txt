@@ -1,3 +1,7 @@
+3.1 - Running your first deployment
+---------------------------------
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,7 +10,7 @@ spec:
   replicas: 3
   selector:
     matchLabels:
-      app: lv-app
+      app: nginx
   revisionHistoryLimit: 5
   progressDeadlineSeconds: 300
   minReadySeconds: 10
@@ -18,13 +22,13 @@ spec:
   template:
     metadata:
       labels:
-        app: lv-app
+        app: nginx
     spec:
       containers:
       - name: lv-nginx
         image: lalindrait/lvrocky91:latest
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         resources:
           requests:
             memory: "256M"
@@ -32,3 +36,23 @@ spec:
           limits:
             memory: "512M"
             cpu: "2000m"
+
+
+
+
+kubectl apply -f first-deployment.yml
+kubectl get all -o wide
+
+kubectl get deploy
+kubectl get deploy -o wide
+kubectl get deploy lv-web-app
+
+kubectl describe deploy lv-web-app
+kubectl describe lv-web-app-56dd85556c
+
+kubectl get rs
+kubectl get rs -o wide
+
+### Can access the website from the pod network
+kubectl exec --it lv-web-app-56dd85556c-hwfst -- bash
+curl http://10.244.226.72

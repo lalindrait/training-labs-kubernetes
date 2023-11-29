@@ -1,0 +1,44 @@
+
+useradd mit
+passwd mit 
+
+openssl genrsa -out mit.key 2048
+openssl req -new -key mit.key -out mit.csr -subj "/CN=mit/O=mitesp"
+openssl req -in mit.csr -text -noout
+
+# To get the encoded request
+cat mit.csr | base64 | tr -d '\n'
+
+### Create the CertificateSigningRequest yaml
+
+kubectl apply -f mit-csr-request.yml
+kubectl get csr
+kubectl certificate approve user-request-mit
+kubectl get csr
+
+kubectl get csr user-request-mit -o jsonpath='{.status.certificate}' | base64 -d > mit-user.crt
+openssl x509 -in mit-user.crt -text -noout
+
+
+create kubeconfig file
+======================
+kubectl config set-cluster kubernetes --insecure-skip-tls-verify=true --server=https://192.168.1.231:6443
+kubectl config set-credentials mit --client-certificate=mit.crt --client-key=mit.key --embed-certs=true
+kubectl config set-context default --cluster=kubernetes --user=mit
+kubectl config use-context default
+
+
+create ClusterRole & ClusterRoleBinding
+========================================
+# To get the shortname for api resources
+kubectl api-resources | grep -i role
+
+kubectl apply -f developer-clusterrole.yml
+kubectl apply -f developer-rolebinding.yml
+
+kubectl get ClusterRole | grep dev
+kubectl get ClusterRoleBinding | grep dev
+
+kubectl get pods
+kubectl get pods -A
+kubectl get ns

@@ -1,16 +1,12 @@
-3.1 - Running your first deployment
----------------------------------
-
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: lv-nginx
+  name: lv-web-app
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
-      app: nginx
+      app: lv-web
   revisionHistoryLimit: 5
   progressDeadlineSeconds: 300
   minReadySeconds: 10
@@ -22,13 +18,13 @@ spec:
   template:
     metadata:
       labels:
-        app: nginx
+        app: lv-web
     spec:
       containers:
-      - name: lv-nginx
-        image: lalindrait/lvrocky91:latest
+      - name: lvnginx
+        image: lalindrait/lvnginx:1.0
         ports:
-        - containerPort: 8080
+        - containerPort: 80
         resources:
           requests:
             memory: "256M"
@@ -36,21 +32,3 @@ spec:
           limits:
             memory: "512M"
             cpu: "2000m"
-
-
-
-
-kubectl apply -f first-deployment.yml
-kubectl get all -o wide
-
-kubectl get deploy
-kubectl get deploy -o wide
-kubectl get deploy lv-nginx
-
-kubectl describe deploy lv-nginx
-
-kubectl get rs
-kubectl get rs -o wide
-
-
-kubectl describe rs lv-nginx-847675d7f7

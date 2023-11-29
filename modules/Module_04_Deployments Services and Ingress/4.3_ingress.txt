@@ -1,9 +1,0 @@
-3.3 - Ingress Controller
----------------------------------
-
-
-
-kubectl get ing
-
-
-

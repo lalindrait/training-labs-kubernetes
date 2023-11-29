@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nginx-block
+spec:
+  podSelector:
+    matchLabels:
+      app: lvnginx2
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 10.244.0.0/16
+      ports:
+        - protocol: TCP
+          port: 80

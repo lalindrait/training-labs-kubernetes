@@ -70,12 +70,14 @@ To remove a pod you can move the manifes in /etc and move it back it will restar
 ### Create a new user certificate 
 ================================
 kubectl get csr
-
-
-
-
-
-
-
-
 kubectl config view
+
+
+
+
+
+
+
+
+### For generating certificates using different tools refer to the k8s documentation 
+https://kubernetes.io/docs/tasks/administer-cluster/certificates/
