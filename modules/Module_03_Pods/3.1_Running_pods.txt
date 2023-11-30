@@ -83,3 +83,7 @@ kubectl explain pods --recursive
 kubectl explain pod.spec.restartPolicy
 kubectl explain pod.spec.affinity.nodeAffinity
 kubectl explain pod.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredDuringExecution
+
+
+# delete a pod forcefully stuck in a terminating state
+kubectl delete pod calico-kube-controllers-7c968b5878-gqtpj --grace-period=0 --force -n kube-system
