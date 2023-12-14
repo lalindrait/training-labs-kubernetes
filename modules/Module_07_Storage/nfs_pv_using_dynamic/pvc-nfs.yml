@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: lv-nfs-vol3-claim
+  name: lv-nfs-vol4-claim
 spec:
   accessModes:
   - ReadWriteOnce

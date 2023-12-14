@@ -11,9 +11,9 @@ spec:
     ports:
     - containerPort: 8080
     volumeMounts:
-    - name: lv-nfs-vol3
+    - name: lv-nfs-vol4
       mountPath: /mnt
   volumes:
-  - name: lv-nfs-vol3
+  - name: lv-nfs-vol4
     persistentVolumeClaim:
-        claimName: lv-nfs-vol3-claim
+        claimName: lv-nfs-vol4-claim

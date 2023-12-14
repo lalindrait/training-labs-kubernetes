@@ -76,7 +76,7 @@ ps -ef
 ps -ef | grep pause
 
 ======================================================================
-Commands
+Other usefull commands
 ======================================================================
 
 kubectl explain pods --recursive
@@ -87,3 +87,6 @@ kubectl explain pod.spec.affinity.nodeAffinity.preferredDuringSchedulingIgnoredD
 
 # delete a pod forcefully stuck in a terminating state
 kubectl delete pod calico-kube-controllers-7c968b5878-gqtpj --grace-period=0 --force -n kube-system
+
+# get the running yaml spec of a pod
+kubectl get pod prometheus-alertmanager-0 -n prometheus -o yaml > prometheus-alertmanager-0.yml

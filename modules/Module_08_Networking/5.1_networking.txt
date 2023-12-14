@@ -27,6 +27,27 @@ kubectl label nodes worker-2 nodename=worker-2
 
 
 
+Installing Calico - Using Manifest
+===================================
+https://docs.tigera.io/calico/latest/getting-started/kubernetes/self-managed-onprem/onpremises
+
+# Go to Install Calico and then "Manifest" tab
+
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/calico.yaml -O
+
+# change the CALICO_IPV4POOL_CIDR to reflect the pod network CIDR
+
+ - name: CALICO_IPV4POOL_CIDR
+              value: "10.244.0.0/16"
+
+# change the cpu request if necessary for containers from the default value
+
+           requests:
+              cpu: 100m
+              #cpu: 250m
+
+
+
 
 
 Installing Calico
