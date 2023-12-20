@@ -1,5 +1,6 @@
-3.2 - Running your first service
----------------------------------
+=================================]
+Running your first service
+=================================
 
 kubectl apply -f first-service.yml
 kubectl get svc
