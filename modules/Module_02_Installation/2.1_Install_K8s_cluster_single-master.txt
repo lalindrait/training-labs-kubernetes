@@ -266,8 +266,9 @@ rm -rf ~/.kube
 dnf uninstall kubeadm kubectl kubelet kubernetes-cni kube*   
 
 
-
-
+Miscellaneous Commands
+------------------------
+cat /var/lib/kubelet/config.yaml
 
 
 

@@ -143,7 +143,8 @@ https://github.com/etcd-io/etcd/releases
 
 wget https://github.com/etcd-io/etcd/releases/download/v3.5.10/etcd-v3.5.10-linux-amd64.tar.gz
 tar -zxf etcd-v3.5.10-linux-amd64.tar.gz
-mv etcd-v3.5.10-linux-amd64/etcd* /usr/local/bin/
+cd etcd-v3.5.10-linux-amd64/
+mv etcd* /usr/local/bin/
 chmod +x /usr/local/bin/etcd*
 
 
