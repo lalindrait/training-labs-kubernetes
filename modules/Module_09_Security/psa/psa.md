@@ -1,7 +1,7 @@
 
-Enable PSA for namespaces
-=========================
+# Enable PSA for namespaces
 
+```
 kubectl get ns
 kubectl create ns nonsecure
 kubectl apply -f lvnginx-pod-priv.yml -n nonsecure
@@ -28,7 +28,7 @@ kubectl describe ns nonsecure
 kubectl apply -f lvnginx-pod-priv.yml -n nonsecure
 kubectl get pods -n nonsecure
 kubectl delete pod lvnginx-priv -n nonsecure
-
+```
 
 
 

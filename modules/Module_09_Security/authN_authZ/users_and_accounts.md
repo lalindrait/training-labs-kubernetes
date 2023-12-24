@@ -1,10 +1,9 @@
-==================================
-Accesing cluster as a custom user
-==================================
+# Accesing cluster as a custom user
 
 
-create new OS user and csr - requesting user
-============================================
+## create new OS user and csr - requesting user
+
+```
 useradd mit
 passwd mit 
 
@@ -19,8 +18,7 @@ cat mit.csr | base64 | tr -d '\n' > mit-user-request.txt
 cp mit-user-request.txt /tmp/
 
 
-Create certs - k8s admin
-==========================
+## Create certs - k8s admin
 ### Create the CertificateSigningRequest yaml
 ### must be adone as k8s admin account
 
@@ -35,10 +33,12 @@ kubectl get csr user-request-mit -o jsonpath='{.status.certificate}' | base64 -d
 openssl x509 -in mit-user.crt -text -noout
 
 cp mit-user.crt /tmp/
+```
 
-create kubeconfig file - requesting user
-========================================
 
+## Create kubeconfig file - requesting user
+
+```
 cp /tmp/mit-user.crt .
 
 kubectl config set-cluster kubernetes --insecure-skip-tls-verify=true --server=https://192.168.1.231:6443
@@ -47,9 +47,12 @@ kubectl config set-context default --cluster=kubernetes --user=mit
 kubectl config use-context default
 
 cat .kube/config
+```
 
-create ClusterRole & ClusterRoleBinding - k8s admin
-===================================================
+
+## Create ClusterRole & ClusterRoleBinding - k8s admin
+
+```
 # To get the shortname for api resources
 kubectl api-resources | grep -i role
 
@@ -58,14 +61,21 @@ kubectl apply -f developer-rolebinding.yml
 
 kubectl get ClusterRole | grep dev
 kubectl get ClusterRoleBinding | grep dev
+```
 
-Test access- requesting user
-========================================
+
+## Test access- requesting user
+
+```
 kubectl get pods
 kubectl get pods -A
 kubectl get ns
+```
 
 
-Additional Commands
-========================================
+
+## Additional Commands
+
+```
 kubectl config view
+```
