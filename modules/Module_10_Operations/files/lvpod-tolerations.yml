@@ -1,0 +1,22 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: lvnginx
+  labels:
+    app: lvnginx
+spec:
+  containers:
+  - name: lvnginx
+    image: lalindrait/lvnginx:1.0
+    ports:
+    - containerPort: 8080
+  tolerations:
+  - key: "security"
+    operator: "Equal"
+    value: "nonsecure"
+    effect: "NoSchedule"
+
+
+
+
+    
