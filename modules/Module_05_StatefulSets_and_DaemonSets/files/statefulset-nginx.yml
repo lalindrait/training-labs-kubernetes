@@ -16,7 +16,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
         - name: lv-web
-          image: lalindrait/lvrocky91:latest
+          image: lalindrait/lvnginx:1.0
           ports:
           - containerPort: 80
             name: http

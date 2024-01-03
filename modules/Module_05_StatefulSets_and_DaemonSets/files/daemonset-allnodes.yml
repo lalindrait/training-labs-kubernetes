@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: lv-nginx-ds
+spec:
+  selector:
+    matchLabels:
+      app: lv-web-d
+  template:
+    metadata:
+      labels:
+        app: lv-web-d
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: lv-web-d
+          image: lalindrait/lvnginx:1.0
+          ports:
+          - containerPort: 80
+            name: http
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        value: 
+        effect: NoSchedule
+
+
+
+
+
+
+          
