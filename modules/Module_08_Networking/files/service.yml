@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: lv-nginx-svc
+  labels:
+    app: lv-web-app
+spec:
+  type: NodePort
+  ports:
+  - targetPort: 80
+    port: 80
+    nodePort: 30001
+    protocol: TCP
+  selector:
+    app: lv-web
