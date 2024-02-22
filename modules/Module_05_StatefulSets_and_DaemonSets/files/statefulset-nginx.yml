@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: lv-web
-  serviceName: lvappsvc
+  serviceName: lv-nginx-svc
   template:
     metadata:
       labels:
