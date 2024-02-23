@@ -30,7 +30,7 @@ kubectl -n ingress-nginx get svc
 ```
 
 
-## configure ingress objects
+## Configure ingress objects
 ```
 # create pods, services and ingress object
 kubectl apply -f test-ingress.yaml
@@ -42,7 +42,21 @@ curl http://192.168.1.241:31376/banana
 ```
 
 
+## Configure Haproxy
+```
+vi /etc/haproxy/haproxy.cfg
+frontend k8s-ingress
+    bind 192.168.1.101:80
+    default_backend ingress-nodeports
 
+backend ingress-nodeports
+    server nginx1 192.168.1.241:31376
+    server nginx1 192.168.1.242:31376
+
+systemctl restart haproxy
+
+curl http://192.168.1.101/banana
+```
 
 
 
