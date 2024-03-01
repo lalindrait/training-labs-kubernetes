@@ -61,7 +61,7 @@ kubectl rollout undo --to-revision=1 deploy lv-web-app
 ## Ausotcaling
 
 ```
-Horizontal Pod Autoscaling
+#Horizontal Pod Autoscaling
 kubectl get hpa
 kubectl describe hpa lv-web-app-6454dc9c85
 kubectl get rs lv-web-app-6454dc9c85 --min=2 --max=5 --cpu-percent=80
