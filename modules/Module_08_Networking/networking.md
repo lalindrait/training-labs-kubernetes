@@ -109,7 +109,7 @@ curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/ca
               #cpu: 250m
 
 
-kubectl delete -f calico.yaml
+kubectl apply -f calico.yaml
 kubectl get pods -A
 
 kubectl delete pod -n kube-system --grace-period=0 --force calico-kube-controllers-786b679988-2gzvl
